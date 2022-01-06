@@ -1,0 +1,100 @@
+---
+# vm - c8.local
+- hosts: frontend
+  remote_user: ec2-user
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  vars:
+    hostname: "c8.local"
+    template_dir: "templates"
+  tasks:
+  - name: "update hostnames"
+    hostname:
+      name: "{{ hostname }}"
+  - name: Upgrade all packages
+    yum:
+      name: '*'
+      state: latest
+      update_cache: yes
+  - name: Install nginx
+    yum:
+      name: nginx
+      state: latest
+    notify:
+      - enable nginx
+  - name: Install other packages
+    yum:
+      name: ['nano', 'sysstat', 'tcpdump', firewalld]
+      state: latest
+  - name: Disabling SELinux
+    selinux:
+      state: disabled
+  - name: 'Disable firewalld'
+    service:
+      name: firewalld
+      state: stopped
+      enabled: no
+  - name: Upload config nginx
+    template:
+      src: "{{ template_dir }}/nginx.conf"
+      dest: "/etc/nginx/nginx.conf"
+      owner: root
+      group: root
+    notify:
+      - restart nginx
+  handlers:
+  - name: enable nginx
+    systemd:
+      name: nginx
+      enabled: yes
+      state: started
+  - name: restart nginx
+    systemd:
+      name: nginx
+      state: restarted
+
+
+# vm - u21.local
+- hosts: backend
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  vars:
+    hostname: "u21.local"
+    template_dir: "templates"
+  tasks:
+  - name: "update hostnames"
+    hostname:
+      name: "{{ hostname }}"
+  - name: Upgrade all packages
+    apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+  - name: Install netdata
+    apt:
+      name: netdata
+      state: latest
+      update_cache: yes
+    notify:
+      - enable netdata
+  - name: Upload config netdata
+    template:
+      src: "{{ template_dir }}/netdata.conf"
+      dest: "/etc/netdata/netdata.conf"
+      owner: root
+      group: root
+    notify:
+      - restart netdata
+  handlers:
+  - name: restart netdata
+    systemd:
+      name: netdata
+      state: restarted
+  - name: enable netdata
+    systemd:
+      name: netdata
+      enabled: yes
+      state: started
