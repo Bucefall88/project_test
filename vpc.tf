@@ -39,3 +39,14 @@ resource "aws_default_route_table" "rt_test" {
     Name = "rt_test"
   }
 }
+# Create DHCP options
+resource "aws_vpc_dhcp_options" "dhcp_test" {
+    domain_name_servers = ["8.8.8.8", "1.1.1.1"]
+  tags = {
+    Name = "dhcp_test"
+  }
+}
+resource "aws_vpc_dhcp_options_association" "dhcp_test" {
+  vpc_id          = aws_vpc.vpc_test.id
+  dhcp_options_id = aws_vpc_dhcp_options.dhcp_test.id
+}

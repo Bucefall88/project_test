@@ -16,10 +16,10 @@ variable "aws_credentials" {
 
 variable "public_key" {
   description = "Instances key"
-  default     = "~/.ssh/project.pub"
+  default     = "~/.aws/project_test.pub"
 }
 
 variable "privat_key" {
   description = "Instances key"
-  default     = "~/.ssh/project"
+  default     = "~/.aws/project_test"
 }

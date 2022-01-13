@@ -88,7 +88,7 @@ resource "local_file" "hosts_cfg" {
 # Preparing VM with Ansible
 resource null_resource "ansible" {
   provisioner "local-exec" {
-    command  = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook -i '${path.module}/ansible/hosts.cfg' --private-key var.privat_key ansible/preparing.yaml"
+    command  = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook -i '${path.module}/ansible/hosts.cfg' --private-key ${var.privat_key} ansible/preparing.yaml"
   }
   depends_on = [aws_instance.c8, aws_instance.u21, local_file.hosts_cfg]
 }
